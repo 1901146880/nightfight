@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NightFight V3</title>
+<style>
+:root{
+  --bg:#070707;--panel:#111;--panel2:#171717;--red:#e50914;--red2:#ff3340;
+  --text:#f5f5f5;--muted:#9a9a9a;--line:#292929;--green:#38e07b;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+radial-gradient(circle at 80% 0%,rgba(229,9,20,.20),transparent 30%),
+radial-gradient(circle at 10% 35%,rgba(229,9,20,.08),transparent 25%),var(--bg);
+color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 0 45%,rgba(255,255,255,.025) 46%,transparent 47%);opacity:.35}
+nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;padding:12px 5%;
+background:rgba(7,7,7,.82);backdrop-filter:blur(16px);border-bottom:1px solid #252525}
+.logo{font-weight:1000;font-size:22px;letter-spacing:2px;margin-right:auto}.logo span{color:var(--red)}
+nav button,.btn{border:1px solid #333;background:#151515;color:white;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:800;transition:.2s}
+nav button:hover,.btn:hover{border-color:var(--red);transform:translateY(-2px);box-shadow:0 8px 25px rgba(229,9,20,.18)}
+.container{width:min(1200px,90%);margin:auto}
+.page{display:none;padding:55px 0}.page.active{display:block}
+.hero{min-height:500px;display:grid;grid-template-columns:1.2fr .8fr;gap:35px;align-items:center}
+.kicker{color:var(--red2);font-weight:900;text-transform:uppercase;letter-spacing:4px;font-size:13px}
+h1{font-size:clamp(52px,9vw,105px);line-height:.85;margin:15px 0 25px;letter-spacing:-5px}
+.hero p{max-width:650px;color:#b8b8b8;font-size:18px;line-height:1.7}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.primary{background:var(--red);border-color:var(--red)}
+.hero-card{border:1px solid #303030;background:linear-gradient(145deg,#181818,#0d0d0d);border-radius:28px;padding:30px;box-shadow:0 25px 80px rgba(0,0,0,.55),0 0 70px rgba(229,9,20,.12);animation:float 4s ease-in-out infinite}
+.glove{font-size:120px;text-align:center;filter:drop-shadow(0 20px 30px rgba(229,9,20,.35));animation:punch 2.2s infinite}
+@keyframes float{50%{transform:translateY(-8px)}}@keyframes punch{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg) scale(1.05)}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:25px 0}
+.stat{padding:24px;border:1px solid var(--line);background:rgba(18,18,18,.9);border-radius:18px}
+.stat b{display:block;font-size:40px;margin-top:7px}.stat span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:2px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 12px 35px rgba(0,0,0,.25)}
+.card h3{margin-top:0}.muted{color:var(--muted)}.tag{display:inline-block;padding:6px 9px;border-radius:99px;background:#241012;color:#ff6d75;font-size:11px;font-weight:900}
+.check{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #252525}.check:last-child{border:0}
+.check input{width:20px;height:20px;accent-color:var(--red)}
+.timer{text-align:center}.phase{font-size:14px;color:#ff6d75;text-transform:uppercase;letter-spacing:4px;font-weight:900}
+.time{font-size:clamp(80px,15vw,170px);font-weight:1000;letter-spacing:-8px;margin:15px 0}
+.round{font-size:20px;color:#aaa}.timer-controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.timer-ring{width:min(520px,90vw);aspect-ratio:1;margin:0 auto 20px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#111 58%,transparent 59%),conic-gradient(var(--red) var(--progress,0%),#292929 0);box-shadow:0 0 70px rgba(229,9,20,.14)}
+.drill{cursor:pointer;transition:.2s}.drill:hover{transform:translateY(-5px);border-color:var(--red);box-shadow:0 15px 35px rgba(229,9,20,.15)}
+.points{font-size:13px;color:#ff7078;font-weight:900}.bar{height:9px;background:#252525;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--red);transition:1s}
+#reactionBox{min-height:220px;border-radius:20px;background:#101010;border:1px solid #292929;display:grid;place-items:center;font-size:24px;font-weight:900;cursor:pointer;user-select:none}
+#reactionBox.ready{background:#251012;border-color:var(--red)}
+#reactionBox.go{background:#12301e;border-color:var(--green)}
+.history{display:flex;flex-direction:column;gap:8px}.history div{display:flex;justify-content:space-between;padding:13px;background:#151515;border-radius:10px}
+#flash{position:fixed;inset:0;z-index:50;pointer-events:none;display:none;place-items:center;background:rgba(229,9,20,.18);animation:flash .8s}
+#flash.show{display:grid}.flashText{font-size:clamp(45px,10vw,110px);font-weight:1000;text-transform:uppercase;text-shadow:0 0 30px #000;animation:impact .8s}
+@keyframes flash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}@keyframes impact{0%{transform:scale(.4);opacity:0}35%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}
+.particle{position:fixed;width:4px;height:4px;border-radius:50%;background:var(--red);opacity:.5;pointer-events:none;z-index:-1;animation:drift linear infinite}
+@keyframes drift{from{transform:translateY(110vh)}to{transform:translateY(-10vh)}}
+@media(max-width:800px){.hero{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.hero-card{display:none}nav{overflow:auto}nav button{white-space:nowrap}.time{letter-spacing:-4px}}
+@media(max-width:520px){.stats{grid-template-columns:1fr}h1{letter-spacing:-3px}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">NIGHT<span>FIGHT</span></div>
+  <button data-page="home">Home</button><button data-page="train">Train</button>
+  <button data-page="speed">Speed Lab</button><button data-page="progress">Progress</button>
+  <button id="soundBtn">🔇 Sound</button>
+</nav>
+
+<div id="flash"><div class="flashText" id="flashText">ROUND!</div></div>
+<div id="particles"></div>
+
+<main class="container">
+<section id="home" class="page active">
+  <div class="hero">
+    <div>
+      <div class="kicker">Night training system • V3</div>
+      <h1>BUILD<br>YOUR<br><span style="color:var(--red)">FIGHT.</span></h1>
+      <p>Train when the world gets quiet. Build speed, sharpen your reactions, and turn every night into another round of progress.</p>
+      <div class="actions"><button class="btn primary" data-jump="train">START TONIGHT'S SESSION →</button><button class="btn" data-jump="speed">ENTER SPEED LAB ⚡</button></div>
+    </div>
+    <div class="hero-card"><div class="glove">🥊</div><h2>NIGHT MODE</h2><p class="muted">3 rounds • speed drills • reaction work</p></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><span>Current streak</span><b id="streak">0</b> days</div>
+    <div class="stat"><span>Sessions</span><b id="sessions">0</b></div>
+    <div class="stat"><span>Speed score</span><b id="speedScore">0</b></div>
+  </div>
+  <div class="grid">
+    <div class="card"><span class="tag">TONIGHT</span><h3>Fight Camp</h3><p class="muted">Warm up → 3 rounds → speed lab → reaction test.</p></div>
+    <div class="card"><span class="tag">GOAL</span><h3>Fast hands</h3><p class="muted">Keep combinations sharp without losing technique.</p></div>
+    <div class="card"><span class="tag">MINDSET</span><h3>One more round.</h3><p class="muted">Consistency beats waiting for motivation.</p></div>
+  </div>
+</section>
+
+<section id="train" class="page">
+  <h2>Tonight's Training</h2><p class="muted">Complete the checklist, then hit the timer.</p>
+  <div class="grid">
+    <div class="card"><h3>Warm-up</h3><div class="check"><input type="checkbox">Jump rope — 3 min</div><div class="check"><input type="checkbox">Shadowbox — 2 min</div><div class="check"><input type="checkbox">Shoulder mobility</div></div>
+    <div class="card"><h3>Fight Rounds</h3><div class="check"><input type="checkbox">Round 1 — combinations</div><div class="check"><input type="checkbox">Round 2 — defense</div><div class="check"><input type="checkbox">Round 3 — speed</div></div>
+    <div class="card"><h3>Finisher</h3><div class="check"><input type="checkbox">20 fast punches</div><div class="check"><input type="checkbox">10 burpees</div><div class="check"><input type="checkbox">30 sec all-out shadowboxing</div></div>
+  </div>
+  <div class="card timer" style="margin-top:20px">
+    <div class="phase" id="phase">ROUND 1 • WORK</div>
+    <div class="timer-ring" id="timerRing"><div><div class="time" id="time">3:00</div><div class="round" id="round">Round 1 / 3</div></div></div>
+    <div class="timer-controls"><button class="btn primary" id="timerToggle">START</button><button class="btn" id="timerReset">RESET</button></div>
+  </div>
+</section>
+
+<section id="speed" class="page">
+  <h2>Speed Lab ⚡</h2><p class="muted">Tap a drill to score points.</p>
+  <div class="grid">
+    <div class="card drill" data-drill="hands"><h3>🥊 Fast Hands</h3><p>30 seconds of straight punches.</p><div class="points">+40 speed</div></div>
+    <div class="card drill" data-drill="footwork"><h3>👟 Footwork Burst</h3><p>Fast in-and-out movement.</p><div class="points">+35 speed</div></div>
+    <div class="card drill" data-drill="power"><h3>💥 Power Combo</h3><p>Cross-hook-cross with clean form.</p><div class="points">+50 speed</div></div>
+    <div class="card drill" data-drill="slip"><h3>↔️ Slip & Roll</h3><p>Slip, roll, return to stance.</p><div class="points">+35 speed</div></div>
+    <div class="card drill" data-drill="sprint"><h3>🏃 Shadow Sprint</h3><p>Nonstop combinations for 20 seconds.</p><div class="points">+45 speed</div></div>
+    <div class="card drill" data-drill="reaction"><h3>⚡ Reaction Test</h3><p>Test your reaction time below.</p><div class="points">+60 speed</div></div>
+  </div>
+  <div class="card" style="margin-top:20px"><h3>Reaction Arena</h3><p class="muted">Press start, wait for green, then click as fast as possible.</p><div id="reactionBox">PRESS START</div><p id="reactionResult" class="muted" style="text-align:center">Best: —</p></div>
+</section>
+
+<section id="progress" class="page">
+  <h2>Your Progress</h2>
+  <div class="stats"><div class="stat"><span>Level</span><b id="level">1</b></div><div class="stat"><span>Speed XP</span><b id="xp">0</b></div><div class="stat"><span>Best reaction</span><b id="bestReaction">—</b></div></div>
+  <div class="card"><h3>Next level</h3><div class="bar"><i id="levelBar"></i></div><p id="levelText" class="muted"></p></div>
+  <div class="card" style="margin-top:18px"><h3>Session History</h3><div id="history" class="history"><p class="muted">No sessions yet.</p></div></div>
+</section>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // Everything is inside this function so it cannot collide with old top-level const/let variables.
+  const NF_STORAGE_KEY = "nightfight-v3-clean";
+  const defaultData = {workouts:0,speed:0,best:0,dates:[],history:[],reactionBest:null};
+  let data = loadData();
+
+  function loadData(){
+    try{return {...defaultData,...JSON.parse(localStorage.getItem(NF_STORAGE_KEY)||"{}")};}
+    catch(e){return {...defaultData};}
+  }
+  function save(){localStorage.setItem(NF_STORAGE_KEY,JSON.stringify(data));render();}
+  function localDateKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+  function addToday(){
+    const today=localDateKey();
+    if(!data.dates.includes(today)) data.dates.push(today);
+  }
+  function streak(){
+    const set=new Set(data.dates), d=new Date(), today=localDateKey(d);
+    if(!set.has(today)) d.setDate(d.getDate()-1);
+    let count=0;
+    while(set.has(localDateKey(d))){count++;d.setDate(d.getDate()-1);}
+    return count;
+  }
+  function render(){
+    document.querySelector("#streak").textContent=streak();
+    document.querySelector("#sessions").textContent=data.workouts;
+    document.querySelector("#speedScore").textContent=data.speed;
+    const level=Math.floor(data.speed/250)+1, into=data.speed%250;
+    document.querySelector("#level").textContent=level;
+    document.querySelector("#xp").textContent=data.speed;
+    document.querySelector("#levelBar").style.width=(into/250*100)+"%";
+    document.querySelector("#levelText").textContent=`${250-into} XP until Level ${level+1}`;
+    document.querySelector("#bestReaction").textContent=data.reactionBest?data.reactionBest+" ms":"—";
+    document.querySelector("#reactionResult").textContent=data.reactionBest?`Best: ${data.reactionBest} ms`:"Best: —";
+    const h=document.querySelector("#history");
+    h.innerHTML=data.history.length?data.history.slice().reverse().slice(0,12).map(x=>`<div><span>${x.date}</span><b>+${x.points} XP</b></div>`).join(""):`<p class="muted">No sessions yet.</p>`;
+  }
+
+  // Navigation
+  function showPage(id){
+    document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+  document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.jump)));
+
+  // Sound
+  let audio=null, soundOn=false;
+  function enableSound(){
+    if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)();
+    audio.resume(); soundOn=true; document.querySelector("#soundBtn").textContent="🔊 Sound On";
+  }
+  function beep(freq=440,duration=.12,type="square",delay=0){
+    if(!soundOn||!audio)return;
+    const t=audio.currentTime+delay,o=audio.createOscillator(),g=audio.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+duration);
+    o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+duration+.02);
+  }
+  function bell(){beep(880,.18,"sine");beep(660,.22,"sine",.22);beep(880,.3,"sine",.48)}
+  function impact(){beep(100,.15,"sawtooth");beep(55,.22,"square",.08);}
+
+  document.querySelector("#soundBtn").addEventListener("click",()=>{if(soundOn){soundOn=false;document.querySelector("#soundBtn").textContent="🔇 Sound"}else enableSound();});
+
+  // Timer
+  const WORK=180, REST=60, ROUNDS=3;
+  let remaining=WORK, phase="work", round=1, timer=null, running=false;
+
+  function format(s){return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
+  function updateTimer(){
+    document.querySelector("#time").textContent=format(remaining);
+    document.querySelector("#phase").textContent=`ROUND ${round} • ${phase==="work"?"WORK":"REST"}`;
+    document.querySelector("#round").textContent=`Round ${round} / ${ROUNDS}`;
+    const total=phase==="work"?WORK:REST;
+    document.querySelector("#timerRing").style.setProperty("--progress",`${((total-remaining)/total)*100}%`);
+  }
+  function flash(text){
+    document.querySelector("#flashText").textContent=text;
+    const f=document.querySelector("#flash");f.classList.remove("show");void f.offsetWidth;f.classList.add("show");
+  }
+  function finishSession(){
+    clearInterval(timer);timer=null;running=false;document.querySelector("#timerToggle").textContent="START";
+    addToday();data.workouts++;data.history.push({date:localDateKey(),points:100});data.speed+=100;save();
+    flash("SESSION COMPLETE!");bell();
+  }
+  function transition(){
+    impact();
+    if(phase==="work"){
+      if(round===ROUNDS){finishSession();return}
+      phase="rest";flash("REST");bell();remaining=REST;
+    }else{
+      round++;phase="work";flash(`ROUND ${round}`);bell();remaining=WORK;
+    }
+    updateTimer();
+  }
+  function tick(){
+    remaining--;
+    if(remaining<=0) transition();
+    updateTimer();
+  }
+  document.querySelector("#timerToggle").addEventListener("click",()=>{
+    if(running){clearInterval(timer);timer=null;running=false;document.querySelector("#timerToggle").textContent="RESUME";return}
+    enableSound();running=true;document.querySelector("#timerToggle").textContent="PAUSE";timer=setInterval(tick,1000);beep(520,.12);
+  });
+  document.querySelector("#timerReset").addEventListener("click",()=>{
+    clearInterval(timer);timer=null;running=false;phase="work";round=1;remaining=WORK;document.querySelector("#timerToggle").textContent="START";updateTimer();
+  });
+
+  // Speed drills
+  const drillPoints={hands:40,footwork:35,power:50,slip:35,sprint:45,reaction:60};
+  document.querySelectorAll(".drill").forEach(d=>d.addEventListener("click",()=>{
+    const pts=drillPoints[d.dataset.drill]||30;addToday();data.speed+=pts;data.history.push({date:localDateKey(),points:pts});save();enableSound();beep(720,.08);beep(980,.1,"square",.1);flash(`+${pts} SPEED`);
+  }));
+
+  // Reaction test
+  const box=document.querySelector("#reactionBox");let reactionStart=0,reactionTimer=null,reactionState="idle";
+  box.addEventListener("click",()=>{
+    enableSound();
+    if(reactionState==="idle"){
+      reactionState="waiting";box.className="ready";box.textContent="WAIT FOR GREEN";
+      const delay=1200+Math.random()*3000;
+      reactionTimer=setTimeout(()=>{reactionState="go";reactionStart=performance.now();box.className="go";box.textContent="CLICK!";beep(1000,.12,"sine")},delay);
+    }else if(reactionState==="waiting"){
+      clearTimeout(reactionTimer);reactionState="idle";box.className="";box.textContent="TOO EARLY — TRY AGAIN";beep(180,.15);setTimeout(()=>{box.textContent="PRESS START"},900);
+    }else{
+      const ms=Math.round(performance.now()-reactionStart);reactionState="idle";box.className="";box.textContent=`${ms} MS — AGAIN?`;
+      if(!data.reactionBest||ms<data.reactionBest){data.reactionBest=ms;data.speed+=60;data.history.push({date:localDateKey(),points:60});addToday();save();}
+      beep(800,.08);beep(1100,.1,"sine",.1);
+    }
+  });
+
+  // Spacebar controls timer.
+  document.addEventListener("keydown",e=>{
+    if(e.code==="Space" && document.querySelector("#train").classList.contains("active") && !e.target.matches("input,button")){e.preventDefault();document.querySelector("#timerToggle").click()}
+  });
+
+  // Decorative particles
+  const particles=document.querySelector("#particles");
+  for(let i=0;i<18;i++){
+    const p=document.createElement("i");p.className="particle";p.style.left=Math.random()*100+"vw";p.style.animationDuration=(8+Math.random()*14)+"s";p.style.animationDelay=(-Math.random()*15)+"s";particles.appendChild(p);
+  }
+
+  updateTimer();render();
+})();
+</script>
+</body>
+</html>
